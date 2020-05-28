@@ -18,19 +18,13 @@ contract("Bond", accounts => {
       Bond.new(1, { from: accounts[0] }),
       NotifyBeforeTokenTransferForTest.new({ from: accounts[0] })
     ]))
-  })
-  afterEach(async () => {
-    bond = null
-    notifyBeforeTokenTransferForTest = null
-  })
-  it("should notify the passed contract of a transfer", async () => {
     await notifyBeforeTokenTransferForTest.creditAccount(accounts[1], 50)
 
     await notifyBeforeTokenTransferForTest.creditAccount(accounts[2], 20)
 
     await notifyBeforeTokenTransferForTest.creditAccount(accounts[3], 30)
 
-    const setContractTargetReceipt = await notifyBeforeTokenTransferForTest.setContractTarget(
+    await notifyBeforeTokenTransferForTest.setContractTarget(
       bond.address, // which bond contract to generate
       zeroAddress, // the erc20 being bound
       1, // the timestamp to start the bond
@@ -40,10 +34,16 @@ contract("Bond", accounts => {
         from: accounts[0]
       }
     )
+  })
+  afterEach(async () => {
+    bond = null
+    notifyBeforeTokenTransferForTest = null
+  })
+  it("should notify the passed contract of a transfer", async () => {
     const target = await notifyBeforeTokenTransferForTest.__contractTarget.call()
-    const bondTarget = new Bond(target)
+    const bond = new Bond(target)
     assert.equal(
-      await bondTarget.owner(),
+      await bond.owner(),
       notifyBeforeTokenTransferForTest.address,
       "the owner of the bond contract should be the contract that created it"
     )
@@ -77,7 +77,7 @@ contract("Bond", accounts => {
       cap: "100"
     })(afterMintValues), "The value was not stored.")
     
-    await bondTarget.transfer(accounts[2], 5, {
+    await bond.transfer(accounts[2], 5, {
       from: accounts[1]
     })
 
@@ -93,5 +93,5 @@ contract("Bond", accounts => {
       cap: "100"
     })(afterTransferValues), "The value was not stored.")
   })
-  // it('')
+  it('should be able to mint and burn tokens as a user sees fit', )
 })
